@@ -112,9 +112,13 @@ function Catalogo() {
                   >
                     <Heart size={16} fill={p.favorito ? "#c0392b" : "none"} color={p.favorito ? "#c0392b" : "#767268"} />
                   </button>
-                  <button onClick={() => setProductoAbierto(p)} className="text-left w-full">
-                    <div className="aspect-[3/4] w-full overflow-hidden bg-alba-border">
-                      <img src={p.foto} alt={p.nombre} className="w-full h-full object-cover" />
+                                    <button onClick={() => setProductoAbierto(p)} className="text-left w-full">
+                    <div className="aspect-[3/4] w-full overflow-hidden bg-white flex items-center justify-center">
+                      <img
+                        src={p.foto}
+                        alt={p.nombre}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
                     </div>
                     <div className="p-3">
                       <p className="font-medium text-sm leading-tight">{p.nombre}</p>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Menu, Bell, Package, Boxes, AlertTriangle, TrendingUp } from "lucide-react";
 import Sidebar, { SolAlba } from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -16,10 +16,29 @@ function saludo() {
   return "Buenas noches";
 }
 
+function temporadaActual() {
+  const mes = new Date().getMonth() + 1; // 1-12
+  if (mes === 12 || mes <= 2) return { nombre: "Verano", foto: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=900" };
+  if (mes >= 3 && mes <= 5) return { nombre: "Otoño", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900" };
+  if (mes >= 6 && mes <= 8) return { nombre: "Invierno", foto: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=900" };
+  return { nombre: "Primavera", foto: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=900" };
+}
+
 function Resumen() {
     const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [notisAbiertas, setNotisAbiertas] = useState(false);
+    const notisRef = useRef(null);
+
+  useEffect(() => {
+    const alTocarAfuera = (e) => {
+      if (notisRef.current && !notisRef.current.contains(e.target)) {
+        setNotisAbiertas(false);
+      }
+    };
+    document.addEventListener("mousedown", alTocarAfuera);
+    return () => document.removeEventListener("mousedown", alTocarAfuera);
+  }, []);
   const { productos } = useProductos();
   const categorias = Object.values(
     productos.reduce((acc, p) => {
@@ -41,7 +60,7 @@ function Resumen() {
             <Menu size={22} />
           </button>
           <div className="flex items-center gap-3">
-            <div className="relative">
+                        <div className="relative" ref={notisRef}>
               <button
                 onClick={() => setNotisAbiertas(!notisAbiertas)}
                 className="p-2 rounded-full hover:bg-alba-border transition-colors relative"
@@ -109,16 +128,16 @@ function Resumen() {
             ))}
           </div>
 
-          {/* Banner nueva colección */}
+                    {/* Banner nueva colección */}
           <div className="relative rounded-2xl overflow-hidden mb-8 h-48">
             <img
-              src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=900"
+              src={temporadaActual().foto}
               alt="Nueva colección"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/35 flex flex-col justify-center px-6 text-white">
               <p className="text-xs">Nueva colección</p>
-              <p className="text-2xl font-bold mb-3">Otoño / Invierno 2026</p>
+              <p className="text-2xl font-bold mb-3">{temporadaActual().nombre} 2026</p>
               <button
   onClick={() => navigate("/panel/catalogo")}
   className="bg-white text-alba-text px-4 py-2 rounded-lg text-sm font-medium w-fit"
