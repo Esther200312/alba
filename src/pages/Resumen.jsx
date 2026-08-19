@@ -1,0 +1,166 @@
+import { useState } from "react";
+import { Menu, Bell, Package, Boxes, AlertTriangle, TrendingUp } from "lucide-react";
+import Sidebar, { SolAlba } from "../components/Sidebar";
+import { useNavigate } from "react-router-dom";
+import { useProductos } from "../context/ProductosContext";
+
+const STOCK_BAJO = [
+  { nombre: "Polera básica", categoria: "Polos", talla: "M", color: "Negro", stock: 3, foto: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100" },
+  { nombre: "Short denim", categoria: "Pantalones", talla: "28", color: "Azul", stock: 2, foto: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=100" },
+];
+
+function saludo() {
+  const hora = new Date().getHours();
+  if (hora < 12) return "Buenos días";
+  if (hora < 19) return "Buenas tardes";
+  return "Buenas noches";
+}
+
+function Resumen() {
+    const navigate = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const [notisAbiertas, setNotisAbiertas] = useState(false);
+  const { productos } = useProductos();
+  const categorias = Object.values(
+    productos.reduce((acc, p) => {
+      const cat = p.categoria || "Sin categoría";
+      if (!acc[cat]) acc[cat] = { nombre: cat, cantidad: 0, foto: p.foto };
+      acc[cat].cantidad += 1;
+      return acc;
+    }, {})
+  );
+
+  return (
+    <div className="min-h-screen bg-alba-bg text-alba-text flex">
+      <Sidebar abierto={menuAbierto} onCerrar={() => setMenuAbierto(false)} />
+
+      <div className="flex-1 min-w-0">
+        {/* Barra superior */}
+        <div className="flex items-center justify-between px-5 md:px-8 py-4 border-b border-alba-border">
+          <button className="md:hidden" onClick={() => setMenuAbierto(true)}>
+            <Menu size={22} />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setNotisAbiertas(!notisAbiertas)}
+                className="p-2 rounded-full hover:bg-alba-border transition-colors relative"
+              >
+                <Bell size={19} />
+                <span className="absolute top-1 right-1 bg-alba-accent text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">2</span>
+              </button>
+
+              {notisAbiertas && (
+                <div className="absolute right-0 mt-2 w-64 bg-alba-bg border border-alba-border rounded-xl shadow-lg p-3 z-40">
+                  <p className="text-sm font-medium mb-2">Notificaciones</p>
+                  <div className="text-sm text-alba-muted border-t border-alba-border pt-2">
+                    Stock bajo: Polera básica (3 unidades)
+                  </div>
+                  <div className="text-sm text-alba-muted border-t border-alba-border pt-2 mt-2">
+                    Stock bajo: Short denim (2 unidades)
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="w-8 h-8 rounded-full bg-alba-border flex items-center justify-center text-xs font-medium">ER</div>
+          </div>
+        </div>
+
+        <main className="p-5 md:p-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-1">
+            <span className="inline-flex items-center gap-2">
+  {saludo()}, equipo Alba <SolAlba size={26} />
+</span>
+          </h2>
+          <p className="text-alba-muted mb-6">Aquí puedes ver el resumen de tu tienda.</p>
+
+          {/* Tarjetas de números */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {[
+              { label: "Productos", valor: "358", sub: "Total en catálogo", icon: Package },
+              { label: "Stock total", valor: "1,245", sub: "Unidades disponibles", icon: Boxes },
+              { label: "Bajo stock", valor: "23", sub: "Productos", icon: AlertTriangle },
+              { label: "Más vendidos", valor: "12", sub: "Productos", icon: TrendingUp },
+            ].map(({ label, valor, sub, icon: Icon }) => (
+              <div key={label} className="border border-alba-border rounded-xl p-4">
+                <div className="flex items-center gap-2 text-alba-muted text-xs mb-2">
+                  <Icon size={14} /> {label}
+                </div>
+                <p className="text-2xl font-bold">{valor}</p>
+                <p className="text-xs text-alba-muted">{sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Categorías principales */}
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold">Categorías principales</h3>
+            <span className="text-sm text-alba-muted cursor-pointer">Ver todas</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {categorias.map((c) => (
+              <div key={c.nombre} className="text-center">
+                <div className="aspect-square rounded-xl overflow-hidden mb-2">
+                  <img src={c.foto} alt={c.nombre} className="w-full h-full object-cover" />
+                </div>
+                <p className="text-sm font-medium">{c.nombre}</p>
+                <p className="text-xs text-alba-muted">{c.cantidad} productos</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Banner nueva colección */}
+          <div className="relative rounded-2xl overflow-hidden mb-8 h-48">
+            <img
+              src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=900"
+              alt="Nueva colección"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/35 flex flex-col justify-center px-6 text-white">
+              <p className="text-xs">Nueva colección</p>
+              <p className="text-2xl font-bold mb-3">Otoño / Invierno 2026</p>
+              <button
+  onClick={() => navigate("/panel/catalogo")}
+  className="bg-white text-alba-text px-4 py-2 rounded-lg text-sm font-medium w-fit"
+>
+  Ver catálogo
+</button>
+            </div>
+          </div>
+
+          {/* Stock bajo */}
+          <h3 className="font-bold mb-3">Stock bajo</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
+              <thead>
+                <tr className="text-left text-alba-muted border-b border-alba-border">
+                  <th className="py-2 font-medium">Producto</th>
+                  <th className="py-2 font-medium">Categoría</th>
+                  <th className="py-2 font-medium">Talla</th>
+                  <th className="py-2 font-medium">Color</th>
+                  <th className="py-2 font-medium">Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                {STOCK_BAJO.map((p) => (
+                  <tr key={p.nombre} className="border-b border-alba-border">
+                    <td className="py-2 flex items-center gap-2">
+                      <img src={p.foto} className="w-8 h-8 rounded object-cover" />
+                      {p.nombre}
+                    </td>
+                    <td className="text-alba-muted">{p.categoria}</td>
+                    <td className="text-alba-muted">{p.talla}</td>
+                    <td className="text-alba-muted">{p.color}</td>
+                    <td className="text-red-500 font-medium">{p.stock} unidades</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default Resumen;

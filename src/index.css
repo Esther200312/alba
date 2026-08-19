@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@theme {
+  --color-alba-bg: #FAFAF7;
+  --color-alba-text: #1A1A18;
+  --color-alba-muted: #767268;
+  --color-alba-accent: #C96A2E;
+  --color-alba-border: #E5E2D9;
+  --font-sans: 'Poppins', sans-serif;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
