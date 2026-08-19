@@ -15,7 +15,7 @@ function Home() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 py-8 md:px-8 md:py-16 items-center">
 
                <div className="bg-alba-border h-48 md:h-107 rounded-2xl overflow-hidden">
-          <img src="/foto1.jpg" className="w-full h-full object-cover" alt="Alba" />
+          <img src="/foto 1.jpg" className="w-full h-full object-cover" alt="Alba" />
         </div>
 
         <div className="text-center px-2">
@@ -34,7 +34,7 @@ function Home() {
         </div>
 
                 <div className="bg-alba-border h-48 md:h-107 rounded-2xl overflow-hidden">
-          <img src="/foto2.jpg" className="w-full h-full object-cover" alt="Alba" />
+          <img src="/foto 2.jpg" className="w-full h-full object-cover" alt="Alba" />
         </div>
 
       </section>
