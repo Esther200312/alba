@@ -3,11 +3,8 @@ import { Menu, Bell, Package, Boxes, AlertTriangle, TrendingUp } from "lucide-re
 import Sidebar, { SolAlba } from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { useProductos } from "../context/ProductosContext";
+import { useVentas } from "../context/VentasContext";
 
-const STOCK_BAJO = [
-  { nombre: "Polera básica", categoria: "Polos", talla: "M", color: "Negro", stock: 3, foto: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100" },
-  { nombre: "Short denim", categoria: "Pantalones", talla: "28", color: "Azul", stock: 2, foto: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=100" },
-];
 
 function saludo() {
   const hora = new Date().getHours();
@@ -40,6 +37,26 @@ function Resumen() {
     return () => document.removeEventListener("mousedown", alTocarAfuera);
   }, []);
   const { productos } = useProductos();
+  const { ventas } = useVentas();
+    const stockTotal = productos.reduce(
+    (suma, p) => suma + p.variantes.reduce((s, v) => s + Number(v.stock), 0),
+    0
+  );
+
+  const productosBajoStock = productos.filter((p) => {
+    const total = p.variantes.reduce((s, v) => s + Number(v.stock), 0);
+    return total > 0 && total <= 5;
+  });
+
+  const productosMasVendidos = Object.values(
+    ventas.reduce((acc, v) => {
+      if (!acc[v.producto]) acc[v.producto] = { nombre: v.producto, unidades: 0 };
+      acc[v.producto].unidades += v.cantidad;
+      return acc;
+    }, {})
+  )
+    .filter((p) => p.unidades > 0)
+    .sort((a, b) => b.unidades - a.unidades);
   const categorias = Object.values(
     productos.reduce((acc, p) => {
       const cat = p.categoria || "Sin categoría";
@@ -48,6 +65,7 @@ function Resumen() {
       return acc;
     }, {})
   );
+  const temporada = temporadaActual();
 
   return (
     <div className="min-h-screen bg-alba-bg text-alba-text flex">
@@ -72,12 +90,6 @@ function Resumen() {
               {notisAbiertas && (
                 <div className="absolute right-0 mt-2 w-64 bg-alba-bg border border-alba-border rounded-xl shadow-lg p-3 z-40">
                   <p className="text-sm font-medium mb-2">Notificaciones</p>
-                  <div className="text-sm text-alba-muted border-t border-alba-border pt-2">
-                    Stock bajo: Polera básica (3 unidades)
-                  </div>
-                  <div className="text-sm text-alba-muted border-t border-alba-border pt-2 mt-2">
-                    Stock bajo: Short denim (2 unidades)
-                  </div>
                 </div>
               )}
             </div>
@@ -95,11 +107,11 @@ function Resumen() {
 
           {/* Tarjetas de números */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: "Productos", valor: "358", sub: "Total en catálogo", icon: Package },
-              { label: "Stock total", valor: "1,245", sub: "Unidades disponibles", icon: Boxes },
-              { label: "Bajo stock", valor: "23", sub: "Productos", icon: AlertTriangle },
-              { label: "Más vendidos", valor: "12", sub: "Productos", icon: TrendingUp },
+                        {[
+              { label: "Productos", valor: productos.length, sub: "Total en catálogo", icon: Package },
+              { label: "Stock total", valor: stockTotal, sub: "Unidades disponibles", icon: Boxes },
+              { label: "Bajo stock", valor: productosBajoStock.length, sub: "Productos", icon: AlertTriangle },
+              { label: "Más vendidos", valor: productosMasVendidos.length, sub: "Productos con ventas", icon: TrendingUp },
             ].map(({ label, valor, sub, icon: Icon }) => (
               <div key={label} className="border border-alba-border rounded-xl p-4">
                 <div className="flex items-center gap-2 text-alba-muted text-xs mb-2">
@@ -129,15 +141,15 @@ function Resumen() {
           </div>
 
                     {/* Banner nueva colección */}
-          <div className="relative rounded-2xl overflow-hidden mb-8 h-48">
+                   <div className="relative rounded-2xl overflow-hidden mb-8 h-48">
             <img
-              src={temporadaActual().foto}
+              src={temporada.foto}
               alt="Nueva colección"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/35 flex flex-col justify-center px-6 text-white">
               <p className="text-xs">Nueva colección</p>
-              <p className="text-2xl font-bold mb-3">{temporadaActual().nombre} 2026</p>
+              <p className="text-2xl font-bold mb-3">{temporada.nombre} 2026</p>
               <button
   onClick={() => navigate("/panel/catalogo")}
   className="bg-white text-alba-text px-4 py-2 rounded-lg text-sm font-medium w-fit"
@@ -160,19 +172,23 @@ function Resumen() {
                   <th className="py-2 font-medium">Stock</th>
                 </tr>
               </thead>
-              <tbody>
-                {STOCK_BAJO.map((p) => (
-                  <tr key={p.nombre} className="border-b border-alba-border">
-                    <td className="py-2 flex items-center gap-2">
-                      <img src={p.foto} className="w-8 h-8 rounded object-cover" />
-                      {p.nombre}
-                    </td>
-                    <td className="text-alba-muted">{p.categoria}</td>
-                    <td className="text-alba-muted">{p.talla}</td>
-                    <td className="text-alba-muted">{p.color}</td>
-                    <td className="text-red-500 font-medium">{p.stock} unidades</td>
-                  </tr>
-                ))}
+                            <tbody>
+                {productosBajoStock.map((p) =>
+                  p.variantes
+                    .filter((v) => v.stock > 0 && v.stock <= 5)
+                    .map((v, i) => (
+                      <tr key={`${p.id}-${i}`} className="border-b border-alba-border">
+                        <td className="py-2 flex items-center gap-2">
+                          <img src={p.foto} className="w-8 h-8 rounded object-cover" />
+                          {p.nombre}
+                        </td>
+                        <td className="text-alba-muted">{p.categoria}</td>
+                        <td className="text-alba-muted">{v.talla}</td>
+                        <td className="text-alba-muted">{v.color}</td>
+                        <td className="text-red-500 font-medium">{v.stock} unidades</td>
+                      </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>
