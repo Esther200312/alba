@@ -34,7 +34,7 @@ function Home() {
         </div>
 
                 <div className="bg-alba-border h-48 md:h-107 rounded-2xl overflow-hidden">
-          <img src="/foto 2 alba.jpg" className="w-full h-full object-cover" alt="Alba" />
+          <img src="/foto 2 alba.jpg" className="w-full h-full object-cover object-top" alt="Alba" />
         </div>
 
       </section>
